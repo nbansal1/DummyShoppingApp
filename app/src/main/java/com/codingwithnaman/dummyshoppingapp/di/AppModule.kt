@@ -4,7 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import com.codingwithnaman.dummyshoppingapp.data.local.ShoppingDao
 import com.codingwithnaman.dummyshoppingapp.data.local.ShoppingDatabase
+import com.codingwithnaman.dummyshoppingapp.data.local.ShoppingDatabase_Impl
 import com.codingwithnaman.dummyshoppingapp.data.remote.PixabayAPI
+import com.codingwithnaman.dummyshoppingapp.repositories.ShoppingRepository
+import com.codingwithnaman.dummyshoppingapp.repositories.ShoppingRepositoryImpl
 import com.codingwithnaman.dummyshoppingapp.util.Constant.BASE_URL
 import com.codingwithnaman.dummyshoppingapp.util.Constant.TABLE_NAME
 import dagger.Module
@@ -22,7 +25,14 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun createShoppingDatabase(
+    fun provideShoppingRepository(
+        shoppingDao: ShoppingDao,
+        pixabayAPI: PixabayAPI
+    ) : ShoppingRepository = ShoppingRepositoryImpl(shoppingDao, pixabayAPI)
+
+    @Singleton
+    @Provides
+    fun provideShoppingDatabase(
         @ApplicationContext context : Context
     ) : ShoppingDatabase = Room.databaseBuilder(
         context,
@@ -32,13 +42,13 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun getShoppingDao(database: ShoppingDatabase) : ShoppingDao{
+    fun provideShoppingDao(database: ShoppingDatabase) : ShoppingDao{
         return database.getShoppingDao()
     }
 
     @Singleton
     @Provides
-    fun createRetrofit() : PixabayAPI = Retrofit.Builder()
+    fun provideRetrofit() : PixabayAPI = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
